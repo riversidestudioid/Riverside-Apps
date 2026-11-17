@@ -1,86 +1,90 @@
+import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, CodeXml, LayoutGrid, MessagesSquare } from "lucide-react";
+import { ArrowRight, CodeXml, LayoutGrid } from "lucide-react";
 import { AppCard } from "@/components/app-card";
-import { HeroLaptop } from "@/components/hero-laptop";
 import { getFeaturedApps } from "@/lib/catalog/queries";
+import { getSiteSettings } from "@/lib/settings";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  const description = settings.site_description || undefined;
+  return {
+    description,
+    alternates: { canonical: "/" },
+    openGraph: {
+      type: "website",
+      locale: "id_ID",
+      siteName: settings.site_name,
+      title: `${settings.site_name} — Solusi Aplikasi & Web App`,
+      description,
+    },
+  };
+}
+
+const services = [
+  {
+    href: "/apps",
+    icon: LayoutGrid,
+    title: "Jelajahi Aplikasi",
+    text: "Temukan aplikasi dan web app siap pakai dari Riverside Studio.",
+    action: "Lihat aplikasi",
+    tone: "light",
+  },
+  {
+    href: "/custom",
+    icon: CodeXml,
+    title: "Buat Aplikasi Custom",
+    text: "Ceritakan kebutuhan Anda, kami bantu rancang dan bangun aplikasinya.",
+    action: "Pesan aplikasi",
+    tone: "dark",
+  },
+] as const;
 
 export default async function Home() {
-  const { apps, categories } = await getFeaturedApps(6);
+  const { apps, categories } = await getFeaturedApps(3);
   return (
     <main id="main">
       <section className="hero">
         <div className="container hero-inner">
-          <div className="hero-copy">
-            <h1>
-              Solusi Aplikasi &amp; Web App
-              <span>untuk Kebutuhanmu.</span>
-            </h1>
-            <p className="hero-lead">
-              Temukan aplikasi siap pakai atau buat aplikasi custom sesuai
-              kebutuhan gereja, sekolah, bisnis, dan organisasi.
-            </p>
-            <div className="hero-actions">
-              <Link className="button button-lg" href="/apps">
-                <LayoutGrid size={20} aria-hidden="true" />
-                Jelajahi Aplikasi
-                <ArrowRight size={18} aria-hidden="true" />
-              </Link>
-              <Link className="button button-outline button-lg" href="/custom">
-                <CodeXml size={20} aria-hidden="true" />
-                Pesan Aplikasi Custom
-              </Link>
-            </div>
-          </div>
-          <HeroLaptop />
+          <h1>
+            Solusi Aplikasi &amp; Web App
+            <span>untuk Kebutuhanmu.</span>
+          </h1>
+          <p className="hero-lead">
+            Pilih aplikasi siap pakai atau pesan aplikasi custom untuk gereja,
+            sekolah, bisnis, dan organisasi.
+          </p>
         </div>
       </section>
 
-      <section className="section container" aria-labelledby="featured-title">
-        <div className="section-head">
-          <h2 id="featured-title">Aplikasi Pilihan</h2>
-          <Link href="/apps" className="text-link">
-            Lihat Semua <ArrowRight size={17} aria-hidden="true" />
-          </Link>
-        </div>
-        {apps.length > 0 ? (
+      <section className="container services" aria-label="Layanan utama">
+        {services.map(({ href, icon: Icon, title, text, action, tone }) => (
+          <article className={`service-card service-${tone}`} key={href}>
+            <span className="service-icon" aria-hidden="true">
+              <Icon size={26} />
+            </span>
+            <h2>{title}</h2>
+            <p>{text}</p>
+            {/* The link's ::after overlay makes the whole card clickable. */}
+            <Link href={href} className="service-link">
+              {action} <ArrowRight size={18} aria-hidden="true" />
+            </Link>
+          </article>
+        ))}
+      </section>
+
+      {apps.length > 0 && (
+        <section className="section container" aria-labelledby="featured-title">
+          <h2 id="featured-title" className="section-heading">
+            Aplikasi Pilihan
+          </h2>
           <div className="app-grid">
             {apps.map((app) => (
               <AppCard key={app.id} app={app} categories={categories} />
             ))}
           </div>
-        ) : (
-          <div className="empty-state">
-            <LayoutGrid size={32} aria-hidden="true" />
-            <h3>Aplikasi segera hadir</h3>
-            <p>
-              Aplikasi akan tampil di sini setelah dipublikasikan. Sementara
-              itu, ceritakan kebutuhan aplikasi Anda kepada kami.
-            </p>
-            <Link href="/custom" className="button button-outline">
-              Pesan Aplikasi Custom
-            </Link>
-          </div>
-        )}
-      </section>
-
-      <section className="section container" aria-labelledby="custom-title">
-        <div className="custom-cta">
-          <span className="custom-cta-icon" aria-hidden="true">
-            <MessagesSquare size={30} />
-          </span>
-          <div className="custom-cta-copy">
-            <h2 id="custom-title">Butuh Aplikasi Sesuai Kebutuhan?</h2>
-            <p>
-              Ceritakan ide Anda. Tim Riverside Studio membantu merancang dan
-              membangun website, web app, aplikasi mobile, atau desktop sesuai
-              kebutuhan organisasi Anda.
-            </p>
-          </div>
-          <Link href="/custom" className="button button-lg">
-            Konsultasi Sekarang <ArrowRight size={18} aria-hidden="true" />
-          </Link>
-        </div>
-      </section>
+        </section>
+      )}
     </main>
   );
 }

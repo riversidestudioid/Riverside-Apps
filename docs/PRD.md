@@ -62,7 +62,7 @@ Harga, pembayaran, akun pelanggan, dan lisensi dikelola **di masing-masing aplik
 
 | Route | Akses | Isi |
 |---|---|---|
-| `/` | Publik | Header, hero, Aplikasi Pilihan (3–6), section custom, footer |
+| `/` | Publik | Header, hero text-first, dua kartu layanan, Aplikasi Pilihan (bila ada), footer |
 | `/apps` | Publik | Semua aplikasi *published*: search, filter kategori, grid, pagination, empty state |
 | `/apps/[slug]` | Publik | Detail aplikasi tanpa harga |
 | `/kategori/[slug]` | Publik | Alias yang mengalihkan ke `/apps?category=slug` |
@@ -78,12 +78,17 @@ Harga, pembayaran, akun pelanggan, dan lisensi dikelola **di masing-masing aplik
 
 ## 4. Kebutuhan Fungsional
 
-### FR-01 Beranda
-- **Header:** logo kiri; navigasi Beranda, Aplikasi, Custom; tombol **Masuk** (khusus admin). Tidak ada menu Harga/Daftar.
-- **Hero:** judul "Solusi Aplikasi & Web App untuk Kebutuhanmu.", deskripsi "Temukan aplikasi siap pakai atau buat aplikasi custom sesuai kebutuhan gereja, sekolah, bisnis, dan organisasi.", tombol **Jelajahi Aplikasi** dan **Pesan Aplikasi Custom**.
-- **Aplikasi Pilihan:** maksimal 6 aplikasi `is_featured` dari Supabase (fallback: aplikasi published terbaru bila belum ada yang ditandai unggulan). Card: ikon, nama, deskripsi singkat, kategori, tombol **Lihat Detail**. Tanpa harga.
-- **Section custom:** "Butuh Aplikasi Sesuai Kebutuhan?" + tombol **Konsultasi Sekarang**.
-- **Footer:** Riverside Studio, navigasi, kontak resmi (hanya jika diisi admin), sosial media (jika diisi), Kebijakan Privasi, copyright. Tidak ada kontak palsu.
+### FR-01 Beranda (disederhanakan, 17 November 2026)
+Tujuan: pengunjung langsung mengerti dua fungsi website.
+- **Header:** logo (ke beranda), **Aplikasi**, **Custom**. Tanpa menu Beranda, Harga, Daftar, maupun tombol Masuk.
+- **Hero text-first:** judul "Solusi Aplikasi & Web App untuk Kebutuhanmu." dan satu kalimat penjelas. Tanpa ilustrasi dan tanpa tombol CTA (aksi ada di kartu layanan).
+- **Dua kartu layanan utama**, berdampingan di desktop/tablet dan bertumpuk di mobile:
+  1. **Jelajahi Aplikasi** → `/apps`.
+  2. **Buat Aplikasi Custom** → `/custom`.
+- **Aplikasi Pilihan:** maksimal 3 aplikasi published (unggulan, atau terbaru bila belum ada unggulan). Section **disembunyikan** bila belum ada produk published. Card tanpa harga.
+- Tidak ada section/tombol CTA yang berulang (banner "Butuh Aplikasi…" dan "Lihat Semua" dihapus).
+- **Footer ringkas:** logo + deskripsi situs, tautan Aplikasi/Custom/Kebijakan Privasi/Syarat Penggunaan, kontak resmi bila diisi admin, copyright, dan tautan kecil **Admin** ke `/login` (route login aman tetap sama, `noindex`).
+- SEO: meta description dan Open Graph beranda diambil dari pengaturan `site_description`; canonical `/`.
 
 ### FR-02 Katalog `/apps`
 - Hanya aplikasi `status='published'` dan `is_visible=true` dengan kategori aktif.

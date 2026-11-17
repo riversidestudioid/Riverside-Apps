@@ -58,6 +58,10 @@ Atas permintaan pemilik agar hasil semirip gambar referensi, beberapa poin instr
 - Urutan statistik dashboard mengikuti referensi (Total Aplikasi, Permintaan Custom, Published, Draft) dan ikon menu Aplikasi berbentuk kotak.
 - Tetap tidak ada ikon lonceng notifikasi karena belum ada fitur notifikasi nyata. Label tombol hero mengikuti instruksi tertulis ("Pesan Aplikasi Custom").
 
+### Beranda disederhanakan (17 November 2026, lokal)
+
+Atas instruksi pemilik: header hanya logo + Aplikasi + Custom; hero text-first tanpa ilustrasi (komponen laptop dihapus lagi); dua kartu layanan (Jelajahi Aplikasi, Buat Aplikasi Custom); Aplikasi Pilihan maksimal 3 dan hanya tampil bila ada produk published; banner CTA custom dan tautan "Lihat Semua" dihapus; footer ringkas dengan tautan kecil "Admin" ke `/login`. Logika Supabase, Auth, RLS, dan admin tidak diubah.
+
 ### Dipertahankan
 Supabase SSR auth (`proxy.ts`, `getClaims`, `admin_members`), RLS, media privat + signed URL 60 detik, verifikasi upload (MIME/ekstensi/ukuran/signature), audit log, `/api/admin/apps`, pencarian RPC `catalog_apps`, konfigurasi Netlify, seluruh test sebelumnya (diperbarui untuk UI baru).
 

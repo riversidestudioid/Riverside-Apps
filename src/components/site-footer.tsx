@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Mail, MessageCircle } from "lucide-react";
 import {
   socialKeys,
   socialLabels,
@@ -9,15 +8,28 @@ import { safeExternalUrl } from "@/lib/catalog/validation";
 import { Brand } from "./brand";
 
 export function SiteFooter({ settings }: { settings: SiteSettings }) {
-  const socials = socialKeys
-    .map((key) => ({ label: socialLabels[key], url: safeExternalUrl(settings[key]) }))
-    .filter((s): s is { label: string; url: string } => Boolean(s.url));
-  const hasContact =
-    Boolean(settings.support_email || settings.support_whatsapp) ||
-    socials.length > 0;
+  // Only official contacts filled in by the admin are shown; nothing is invented.
+  const contacts = [
+    settings.support_email && {
+      label: settings.support_email,
+      href: `mailto:${settings.support_email}`,
+      external: false,
+    },
+    settings.support_whatsapp && {
+      label: "WhatsApp",
+      href: `https://wa.me/${settings.support_whatsapp}`,
+      external: true,
+    },
+    ...socialKeys.map((key) => {
+      const url = safeExternalUrl(settings[key]);
+      return url && { label: socialLabels[key], href: url, external: true };
+    }),
+  ].filter((c): c is { label: string; href: string; external: boolean } =>
+    Boolean(c),
+  );
   return (
     <footer className="site-footer">
-      <div className="container footer-grid">
+      <div className="container footer-main">
         <div className="footer-about">
           <Brand
             name={settings.site_name}
@@ -26,47 +38,34 @@ export function SiteFooter({ settings }: { settings: SiteSettings }) {
           />
           {settings.site_description && <p>{settings.site_description}</p>}
         </div>
-        <nav aria-label="Navigasi footer" className="footer-col">
-          <h2>Navigasi</h2>
-          <Link href="/">Beranda</Link>
+        <nav aria-label="Navigasi footer" className="footer-links">
           <Link href="/apps">Aplikasi</Link>
-          <Link href="/custom">Pesan Aplikasi Custom</Link>
-        </nav>
-        <nav aria-label="Informasi" className="footer-col">
-          <h2>Informasi</h2>
+          <Link href="/custom">Custom</Link>
           <Link href="/privacy">Kebijakan Privasi</Link>
           <Link href="/terms">Syarat Penggunaan</Link>
         </nav>
-        <div className="footer-col">
-          <h2>Kontak</h2>
-          {settings.support_email && (
-            <a href={`mailto:${settings.support_email}`}>
-              <Mail size={16} aria-hidden="true" />
-              {settings.support_email}
-            </a>
-          )}
-          {settings.support_whatsapp && (
-            <a
-              href={`https://wa.me/${settings.support_whatsapp}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <MessageCircle size={16} aria-hidden="true" />
-              WhatsApp
-            </a>
-          )}
-          {socials.map((s) => (
-            <a key={s.label} href={s.url} target="_blank" rel="noopener noreferrer">
-              {s.label}
-            </a>
-          ))}
-          {!hasContact && <Link href="/custom">Konsultasi melalui formulir</Link>}
-        </div>
       </div>
       <div className="container footer-bottom">
-        <small>
-          © {new Date().getFullYear()} Riverside Studio. Hak cipta dilindungi.
-        </small>
+        <small>© {new Date().getFullYear()} Riverside Studio</small>
+        {contacts.length > 0 && (
+          <ul className="footer-contacts" aria-label="Kontak resmi">
+            {contacts.map((c) => (
+              <li key={c.href}>
+                <a
+                  href={c.href}
+                  {...(c.external
+                    ? { target: "_blank", rel: "noopener noreferrer" }
+                    : {})}
+                >
+                  {c.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
+        <Link href="/login" className="footer-admin" rel="nofollow">
+          Admin
+        </Link>
       </div>
     </footer>
   );

@@ -30,6 +30,9 @@ test("featured homepage, catalog grid and detail come from the database without 
   page,
 }) => {
   await page.goto("/");
+  await expect(
+    page.getByRole("heading", { name: "Aplikasi Pilihan", level: 2 }),
+  ).toBeVisible();
   await expect(page.locator(".app-card")).toHaveCount(1);
   await expect(page.locator(".app-card")).toContainText("Alat Sertifikat Uji");
   await expect(page.locator(".app-card")).toContainText("Pendidikan");
@@ -168,10 +171,12 @@ test("empty published database shows professional states rather than fallback pr
     page.getByRole("heading", { name: "Katalog sedang dipersiapkan" }),
   ).toBeVisible();
   await expect(page.locator(".app-card")).toHaveCount(0);
+  // No published products: the featured section is hidden, the two services remain.
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "Aplikasi segera hadir" }),
-  ).toBeVisible();
+    page.getByRole("heading", { name: "Aplikasi Pilihan" }),
+  ).toHaveCount(0);
+  await expect(page.locator(".service-card")).toHaveCount(2);
   await page.goto("/apps/alat-sertifikat-uji");
   await expect(
     page.getByRole("heading", { name: "Halaman tidak ditemukan" }),
