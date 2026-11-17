@@ -13,11 +13,10 @@ export type ActionResult = { error?: string; id?: string; ok?: boolean };
 function refresh() {
   revalidatePath("/");
   revalidatePath("/apps");
-  revalidatePath("/harga");
+  revalidatePath("/apps/[slug]", "page");
   revalidatePath("/admin");
   revalidatePath("/admin/apps");
   revalidatePath("/admin/media");
-  revalidatePath("/admin/plans");
 }
 export async function saveApp(input: unknown): Promise<ActionResult> {
   const { supabase } = await requireAdmin();

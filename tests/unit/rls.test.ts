@@ -579,7 +579,7 @@ test("settings and media: admin-only writes, private actors, immutable published
     await identity(db, "anon", "");
     assert.equal(
       (await db.query("select key,value from site_settings")).rows.length,
-      4,
+      11,
     );
     await assert.rejects(db.query("select updated_by from site_settings"));
   } finally {

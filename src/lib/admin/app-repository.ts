@@ -15,7 +15,7 @@ export async function persistApp(db: SupabaseClient<Database>, input: unknown) {
           ? "Data berubah di sesi lain. Muat ulang sebelum menyimpan."
           : error.code === "23505"
             ? "Slug sudah dipakai."
-            : "Belum dapat menyimpan. Periksa kelengkapan kategori, thumbnail, URL aplikasi, harga, dan lisensi sebelum publikasi.",
+            : "Belum dapat menyimpan. Sebelum publish, pastikan kategori aktif, deskripsi minimal 20 karakter, URL aplikasi HTTPS, dan ikon sudah diunggah.",
     };
   return { ok: true, id: data };
 }

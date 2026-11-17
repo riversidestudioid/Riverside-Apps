@@ -108,7 +108,8 @@ export async function createCatalogApi() {
       if (
         url.pathname === "/rest/v1/rpc/save_catalog_app" ||
         url.pathname === "/rest/v1/rpc/save_catalog_media" ||
-        url.pathname === "/rest/v1/rpc/save_site_settings"
+        url.pathname === "/rest/v1/rpc/save_site_settings" ||
+        url.pathname === "/rest/v1/rpc/submit_custom_request"
       ) {
         const body = await readJson(req);
         const fn = url.pathname.split("/").pop()!;
@@ -118,133 +119,121 @@ export async function createCatalogApi() {
         );
         return json(rows[0].result);
       }
-      if (url.pathname === "/storage/v1/object/list/app-media") {
-        const body = await readJson(req);
-        const prefix = String(body.prefix ?? "");
-        const { rows } = await db.query<{ id: string; name: string }>(
-          "select id,name from storage.objects where bucket_id=$1 and name like $2",
-          ["app-media", prefix.replace(/\/$/, "") + "/%"],
+      const storageMatch = url.pathname.match(
+        /^\/storage\/v1\/object(?:\/(list|info|sign|public|authenticated))?\/(app-media|site-assets)(?:\/(.*))?$/,
+      );
+      if (storageMatch) {
+        const [, action, bucket, rawPath = ""] = storageMatch;
+        const path = decodeURIComponent(rawPath);
+        const key = bucket + "/" + path;
+        const pixel = Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j7S8AAAAASUVORK5CYII=",
+          "base64",
         );
-        return json(
-          rows.map((row) => ({
-            ...row,
-            name: row.name.split("/").pop(),
-            metadata: {},
-          })),
-        );
-      }
-      if (
-        url.pathname === "/storage/v1/object/app-media" &&
-        req.method === "DELETE"
-      ) {
-        const body = await readJson(req);
-        const paths = body.prefixes as string[];
-        const result = [];
-        for (const path of paths) {
-          const { rows } = await db.query(
-            "delete from storage.objects where bucket_id=$1 and name=$2 returning id,name",
-            ["app-media", path],
+        const visible = async () =>
+          (
+            await db.query(
+              "select id,name from storage.objects where bucket_id=$1 and name=$2",
+              [bucket, path],
+            )
+          ).rows as { id: string; name: string }[];
+        if (action === "list") {
+          const body = await readJson(req);
+          const prefix = String(body.prefix ?? "");
+          const { rows } = await db.query<{ id: string; name: string }>(
+            "select id,name from storage.objects where bucket_id=$1 and name like $2",
+            [bucket, prefix.replace(/\/$/, "") + "/%"],
           );
-          result.push(...rows);
-          if (rows.length) files.delete(path);
+          return json(
+            rows.map((row) => ({
+              ...row,
+              name: row.name.split("/").pop(),
+              metadata: {},
+            })),
+          );
         }
-        return json(result);
-      }
-      const infoPrefix = "/storage/v1/object/info/app-media/";
-      if (url.pathname.startsWith(infoPrefix)) {
-        const path = decodeURIComponent(url.pathname.slice(infoPrefix.length));
-        const { rows } = await db.query<{ id: string; name: string }>(
-          "select id,name from storage.objects where bucket_id=$1 and name=$2",
-          ["app-media", path],
-        );
-        if (!rows.length) return json({ message: "Not found" }, 404);
-        const f = files.get(path);
-        return json({
-          ...rows[0],
-          bucket_id: "app-media",
-          content_type: f?.type ?? "image/png",
-          size: f?.bytes.length ?? 68,
-        });
-      }
-      const uploadPrefix = "/storage/v1/object/app-media/";
-      if (url.pathname.startsWith(uploadPrefix) && req.method === "POST") {
-        const path = decodeURIComponent(
-          url.pathname.slice(uploadPrefix.length),
-        );
-        const chunks = [];
-        for await (const chunk of req) chunks.push(Buffer.from(chunk));
-        const bytes = Buffer.concat(chunks);
-        const form = await new Response(new Uint8Array(bytes), {
-          headers: { "Content-Type": String(req.headers["content-type"]) },
-        }).formData();
-        const file = [...form.values()].find((v) => v instanceof File) as
-          File | undefined;
-        if (!file) return json({ message: "File required" }, 400);
-        const { rows } = await db.query(
-          "insert into storage.objects(bucket_id,name) values($1,$2) returning id",
-          ["app-media", path],
-        );
-        files.set(path, {
-          bytes: new Uint8Array(await file.arrayBuffer()),
-          type: file.type,
-        });
-        return json({
-          Id: (rows[0] as { id: string }).id,
-          Key: "app-media/" + path,
-        });
-      }
-      if (
-        (url.pathname.startsWith(uploadPrefix) ||
-          url.pathname.startsWith(
-            "/storage/v1/object/authenticated/app-media/",
-          )) &&
-        req.method === "GET"
-      ) {
-        const path = decodeURIComponent(
-          url.pathname.replace(
-            /^\/storage\/v1\/object\/(authenticated\/)?app-media\//,
-            "",
-          ),
-        );
-        const { rows } = await db.query(
-          "select id from storage.objects where bucket_id=$1 and name=$2",
-          ["app-media", path],
-        );
-        if (!rows.length) return json({ message: "Not found" }, 404);
-        const file = files.get(path);
-        res.writeHead(200, { "Content-Type": file?.type ?? "image/png" });
-        res.end(
-          file?.bytes ??
-            Buffer.from(
-              "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j7S8AAAAASUVORK5CYII=",
-              "base64",
-            ),
-        );
-        return;
-      }
-      const prefix = "/storage/v1/object/sign/app-media/";
-      if (url.pathname.startsWith(prefix)) {
-        const path = decodeURIComponent(url.pathname.slice(prefix.length));
-        const { rows } = await db.query(
-          "select id from storage.objects where bucket_id=$1 and name=$2",
-          ["app-media", path],
-        );
-        if (!rows.length) return json({ message: "Not found" }, 404);
-        if (req.method === "POST")
+        if (action === "public") {
+          // Public bucket reads bypass RLS, like Supabase's public endpoint.
+          await db.exec("reset role");
+          const { rows } = await db.query(
+            "select o.id from storage.objects o join storage.buckets b on b.id=o.bucket_id where b.public and o.bucket_id=$1 and o.name=$2",
+            [bucket, path],
+          );
+          if (!rows.length) return json({ message: "Not found" }, 404);
+          const f = files.get(key);
+          res.writeHead(200, { "Content-Type": f?.type ?? "image/png" });
+          res.end(f?.bytes ?? pixel);
+          return;
+        }
+        if (action === "info") {
+          const rows = await visible();
+          if (!rows.length) return json({ message: "Not found" }, 404);
+          const f = files.get(key);
           return json({
-            signedURL: "/object/sign/app-media/" + path + "?token=test-only",
+            ...rows[0],
+            bucket_id: bucket,
+            content_type: f?.type ?? "image/png",
+            size: f?.bytes.length ?? 68,
           });
-        res.writeHead(200, {
-          "Content-Type": "image/png",
-          "Cache-Control": "no-store",
-        });
-        res.end(
-          Buffer.from(
-            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j7S8AAAAASUVORK5CYII=",
-            "base64",
-          ),
-        );
-        return;
+        }
+        if (action === "sign") {
+          if (!(await visible()).length)
+            return json({ message: "Not found" }, 404);
+          if (req.method === "POST")
+            return json({
+              signedURL: `/object/sign/${bucket}/${path}?token=test-only`,
+            });
+          res.writeHead(200, {
+            "Content-Type": files.get(key)?.type ?? "image/png",
+            "Cache-Control": "no-store",
+          });
+          res.end(files.get(key)?.bytes ?? pixel);
+          return;
+        }
+        if (!action && req.method === "DELETE") {
+          const body = await readJson(req);
+          const result = [];
+          for (const target of body.prefixes as string[]) {
+            const { rows } = await db.query(
+              "delete from storage.objects where bucket_id=$1 and name=$2 returning id,name",
+              [bucket, target],
+            );
+            result.push(...rows);
+            if (rows.length) files.delete(bucket + "/" + target);
+          }
+          return json(result);
+        }
+        if (!action && req.method === "POST") {
+          const chunks = [];
+          for await (const chunk of req) chunks.push(Buffer.from(chunk));
+          const form = await new Response(
+            new Uint8Array(Buffer.concat(chunks)),
+            {
+              headers: { "Content-Type": String(req.headers["content-type"]) },
+            },
+          ).formData();
+          const file = [...form.values()].find((v) => v instanceof File) as
+            File | undefined;
+          if (!file) return json({ message: "File required" }, 400);
+          const { rows } = await db.query(
+            "insert into storage.objects(bucket_id,name) values($1,$2) returning id",
+            [bucket, path],
+          );
+          files.set(key, {
+            bytes: new Uint8Array(await file.arrayBuffer()),
+            type: file.type,
+          });
+          return json({ Id: (rows[0] as { id: string }).id, Key: key });
+        }
+        if ((!action || action === "authenticated") && req.method === "GET") {
+          if (!(await visible()).length)
+            return json({ message: "Not found" }, 404);
+          const file = files.get(key);
+          res.writeHead(200, { "Content-Type": file?.type ?? "image/png" });
+          res.end(file?.bytes ?? pixel);
+          return;
+        }
+        return json({ message: "Unsupported storage request" }, 400);
       }
       const table = url.pathname.replace("/rest/v1/", "");
       const allowed: Record<string, string[]> = {
@@ -254,13 +243,14 @@ export async function createCatalogApi() {
         plans: ["id", "app_id", "is_active"],
         admin_members: ["user_id"],
         site_settings: ["id", "key"],
+        custom_requests: ["id", "status"],
       };
       if (!allowed[table])
         return json({ message: "Not available in test API" }, 404);
       const clauses: string[] = [];
       const args: unknown[] = [];
       for (const [column, filter] of url.searchParams) {
-        if (["select", "order", "limit"].includes(column)) continue;
+        if (["select", "order", "limit", "offset"].includes(column)) continue;
         if (!allowed[table].includes(column) || !/^(eq|neq)\./.test(filter))
           throw Error("Unsupported test filter");
         const neq = filter.startsWith("neq.");
@@ -284,6 +274,16 @@ export async function createCatalogApi() {
         order = " order by " + fields.join(",");
       }
       const where = clauses.length ? " where " + clauses.join(" and ") : "";
+      const limitValue = url.searchParams.get("limit");
+      const offsetValue = url.searchParams.get("offset");
+      if (
+        (limitValue && !/^\d+$/.test(limitValue)) ||
+        (offsetValue && !/^\d+$/.test(offsetValue))
+      )
+        throw Error("Unsupported test range");
+      const range =
+        (limitValue ? ` limit ${Number(limitValue)}` : "") +
+        (offsetValue ? ` offset ${Number(offsetValue)}` : "");
       let result;
       if (req.method === "POST" || req.method === "PATCH") {
         const body = await readJson(req);
@@ -306,6 +306,8 @@ export async function createCatalogApi() {
           ],
           categories: ["slug", "name", "icon", "sort_order", "is_active"],
           admin_members: ["user_id"],
+          site_settings: ["value"],
+          custom_requests: ["status", "admin_notes"],
           app_media: [
             "app_id",
             "kind",
@@ -329,7 +331,7 @@ export async function createCatalogApi() {
         else {
           const n = args.length;
           result = await db.query(
-            `update public."${table}" set ${columns.map((c, i) => `"${c}"=$${n + i + 1}`).join(",")}${where} returning *`,
+            `update public."${table}" set ${columns.map((c, i) => `"${c}"=$${n + i + 1}`).join(",")}${where} returning ${table === "site_settings" ? "key,value" : "*"}`,
             [...args, ...Object.values(body)],
           );
         }
@@ -340,7 +342,7 @@ export async function createCatalogApi() {
         );
       else
         result = await db.query(
-          `select ${table === "site_settings" ? "key,value" : "*"} from public."${table}"${where}${order}`,
+          `select ${table === "site_settings" ? "key,value" : "*"} from public."${table}"${where}${order}${range}`,
           args,
         );
       if (req.method === "HEAD") {
@@ -359,14 +361,25 @@ export async function createCatalogApi() {
             );
       return json(result.rows);
     } catch (error) {
-      return json(
-        { message: error instanceof Error ? error.message : "Test SQL failed" },
-        typeof error === "object" &&
-          error &&
-          "code" in error &&
-          String(error.code) === "42501"
+      const code =
+        typeof error === "object" && error && "code" in error
+          ? String(error.code)
+          : "";
+      // Mirrors PostgREST: 42501 -> 403, PTxyz -> HTTP xyz, data errors -> 400.
+      const status =
+        code === "42501"
           ? 403
-          : 500,
+          : /^PT\d{3}$/.test(code)
+            ? Number(code.slice(2))
+            : /^(22|23)/.test(code)
+              ? 400
+              : 500;
+      return json(
+        {
+          message: error instanceof Error ? error.message : "Test SQL failed",
+          code,
+        },
+        status,
       );
     }
   }
