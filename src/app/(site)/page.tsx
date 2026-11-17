@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, CodeXml, LayoutGrid, MessagesSquare } from "lucide-react";
 import { AppCard } from "@/components/app-card";
-import { BrandMark } from "@/components/brand";
+import { HeroLaptop } from "@/components/hero-laptop";
 import { getFeaturedApps } from "@/lib/catalog/queries";
 
 export default async function Home() {
@@ -31,9 +31,7 @@ export default async function Home() {
               </Link>
             </div>
           </div>
-          <div className="hero-accent" aria-hidden="true">
-            <BrandMark className="hero-accent-mark" />
-          </div>
+          <HeroLaptop />
         </div>
       </section>
 

@@ -482,10 +482,10 @@ fieldset:disabled .button {
 .hero-inner {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
   align-items: center;
-  gap: 40px;
-  padding-block: 72px 64px;
+  gap: 32px;
+  padding-block: 48px 32px;
 }
 .hero-copy {
   position: relative;
@@ -494,7 +494,7 @@ fieldset:disabled .button {
   gap: 22px;
 }
 .hero h1 {
-  font-size: clamp(34px, 5vw, 54px);
+  font-size: clamp(32px, 3.3vw, 46px);
   line-height: 1.08;
   letter-spacing: -0.035em;
   font-weight: 800;
@@ -504,8 +504,8 @@ fieldset:disabled .button {
   color: var(--teal);
 }
 .hero-lead {
-  max-width: 560px;
-  font-size: clamp(16px, 1.6vw, 18px);
+  max-width: 540px;
+  font-size: clamp(16px, 1.4vw, 18.5px);
   line-height: 1.65;
 }
 .hero-actions {
@@ -514,29 +514,16 @@ fieldset:disabled .button {
   gap: 12px;
   margin-top: 6px;
 }
-.hero-accent {
+.hero-art {
   position: relative;
-  justify-self: center;
-  display: grid;
-  place-items: center;
-  width: min(100%, 360px);
-  aspect-ratio: 1;
-  border-radius: 46% 54% 52% 48% / 52% 44% 56% 48%;
-  background:
-    radial-gradient(circle at 30% 28%, rgb(255 255 255 / 0.9), transparent 42%),
-    linear-gradient(140deg, var(--mint-strong), #eaf6fb 70%);
+  width: 112%;
+  margin-right: -6%;
+  pointer-events: none;
 }
-.hero-accent::after {
-  content: "";
-  position: absolute;
-  inset: 14%;
-  border-radius: inherit;
-  border: 1px solid rgb(10 138 132 / 0.12);
-}
-.hero-accent-mark {
-  width: 34%;
+.hero-art svg {
+  display: block;
+  width: 100%;
   height: auto;
-  opacity: 0.9;
 }
 
 /* ---------- Sections ---------- */
@@ -583,13 +570,14 @@ fieldset:disabled .button {
 .app-card {
   position: relative;
   display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 22px;
+  align-items: center;
+  gap: 18px;
+  min-height: 112px;
+  padding: 20px 20px 20px 22px;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--surface);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow);
   transition:
     border-color 180ms var(--ease),
     box-shadow 180ms var(--ease),
@@ -597,55 +585,61 @@ fieldset:disabled .button {
 }
 .app-card:hover {
   border-color: var(--mint-line);
-  box-shadow: var(--shadow);
+  box-shadow:
+    0 1px 2px rgb(11 31 68 / 0.04),
+    0 14px 32px rgb(11 31 68 / 0.08);
   transform: translateY(-2px);
 }
-.app-card-head {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.app-card-title {
+.app-card-body {
   display: grid;
-  gap: 6px;
+  gap: 3px;
+  flex: 1;
   min-width: 0;
 }
 .app-card h2,
 .app-card h3 {
   font-size: 18px;
+  letter-spacing: -0.02em;
   overflow-wrap: anywhere;
 }
 .app-card-desc {
-  flex: 1;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  font-size: 14.5px;
+  font-size: 14px;
+  line-height: 1.5;
 }
-.app-card-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  width: fit-content;
-  min-height: 40px;
-  padding: 8px 14px;
-  border-radius: 10px;
+.app-card-category {
+  margin-top: 4px;
+  color: var(--teal-ink);
+  font-size: 12.5px;
+  font-weight: 650;
+}
+.app-card-arrow {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
   background: var(--mint);
   color: var(--teal-ink);
-  font-weight: 650;
-  font-size: 14px;
+  transition:
+    background 160ms var(--ease),
+    color 160ms var(--ease);
 }
-.app-card-link::after {
+.app-card-arrow::after {
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: inherit;
+  border-radius: var(--radius-lg);
 }
-.app-card-link:hover {
-  background: var(--mint-strong);
+.app-card:hover .app-card-arrow {
+  background: var(--teal);
+  color: #fff;
 }
-.app-card-link:focus-visible {
+.app-card-arrow:focus-visible {
   outline-offset: 3px;
 }
 .app-icon {
@@ -2176,10 +2170,13 @@ a.list-row:hover {
   }
   .hero-inner {
     grid-template-columns: minmax(0, 1fr);
-    padding-block: 48px 40px;
+    gap: 12px;
+    padding-block: 36px 8px;
   }
-  .hero-accent {
-    display: none;
+  .hero-art {
+    width: min(100%, 480px);
+    margin: 0 auto;
+    justify-self: center;
   }
   .custom-cta {
     grid-template-columns: minmax(0, 1fr);

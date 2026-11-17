@@ -7,7 +7,7 @@ import {
   CodeXml,
   ExternalLink,
   House,
-  LayoutGrid,
+  Package,
   LogOut,
   Menu,
   Settings,
@@ -18,7 +18,7 @@ import { BrandMark } from "@/components/brand";
 
 const nav = [
   { href: "/admin", label: "Dashboard", icon: House, exact: true },
-  { href: "/admin/apps", label: "Aplikasi", icon: LayoutGrid, also: ["/admin/categories", "/admin/media"] },
+  { href: "/admin/apps", label: "Aplikasi", icon: Package, also: ["/admin/categories", "/admin/media"] },
   { href: "/admin/requests", label: "Permintaan Custom", icon: CodeXml },
   { href: "/admin/settings", label: "Pengaturan", icon: Settings },
 ];
