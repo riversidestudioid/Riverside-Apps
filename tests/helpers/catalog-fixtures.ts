@@ -4,8 +4,8 @@ export const publishedSlug = "alat-sertifikat-uji";
 // Database fixtures are test-only and are never imported by src/ or loaded in production.
 export async function seedCatalogFixture(db: PGlite) {
   await db.exec(`reset role;
- insert into apps(id,slug,name,tagline,short_description,description,category_id,is_featured,featured_order,launch_url,demo_url,created_at)
- select '${publishedId}','${publishedSlug}','Alat Sertifikat Uji','Untuk pendidikan','Deskripsi ringkas katalog.','Generator sertifikat dengan pencarian rahasia-katalog pada deskripsi lengkap.',id,true,1,'https://example.com/app','https://example.com/demo','2026-01-01' from categories where slug='pendidikan';
+ insert into apps(id,slug,name,tagline,short_description,description,key_features,category_id,is_featured,featured_order,launch_url,demo_url,created_at)
+ select '${publishedId}','${publishedSlug}','Alat Sertifikat Uji','Untuk pendidikan','Deskripsi ringkas katalog.','Generator sertifikat dengan pencarian rahasia-katalog pada deskripsi lengkap.',array['Kelola template','Ekspor PDF'],id,true,1,'https://example.com/app','https://example.com/demo','2026-01-01' from categories where slug='pendidikan';
  insert into app_media(app_id,kind,storage_path,alt_text) values
  ('${publishedId}','thumbnail','${publishedId}/44444444-4444-4444-8444-444444444444.png','Thumbnail sertifikat'),
  ('${publishedId}','screenshot','${publishedId}/55555555-5555-4555-8555-555555555555.png','Screenshot pengelolaan template');

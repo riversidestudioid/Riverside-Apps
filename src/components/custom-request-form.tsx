@@ -23,12 +23,7 @@ export function CustomRequestForm({ configured }: { configured: boolean }) {
 
   if (state.status === "success")
     return (
-      <div
-        className="form-success"
-        role="status"
-        tabIndex={-1}
-        ref={summary}
-      >
+      <div className="form-success" role="status" tabIndex={-1} ref={summary}>
         <CircleCheck size={40} aria-hidden="true" />
         <h2>{state.message}</h2>
         <p>
@@ -82,9 +77,12 @@ export function CustomRequestForm({ configured }: { configured: boolean }) {
       <fieldset disabled={pending || !configured}>
         <legend className="sr-only">Data permintaan aplikasi custom</legend>
         <div className="form-grid">
-          <label className="field">
-            <span>Nama</span>
+          <div className="field">
+            <label className="field-label" htmlFor="cr-name">
+              Nama
+            </label>
             <input
+              id="cr-name"
               name="name"
               autoComplete="name"
               required
@@ -93,10 +91,13 @@ export function CustomRequestForm({ configured }: { configured: boolean }) {
               aria-describedby={describe("name")}
             />
             {fieldError("name")}
-          </label>
-          <label className="field">
-            <span>Email</span>
+          </div>
+          <div className="field">
+            <label className="field-label" htmlFor="cr-email">
+              Email
+            </label>
             <input
+              id="cr-email"
               name="email"
               type="email"
               autoComplete="email"
@@ -106,10 +107,13 @@ export function CustomRequestForm({ configured }: { configured: boolean }) {
               aria-describedby={describe("email")}
             />
             {fieldError("email")}
-          </label>
-          <label className="field">
-            <span>Nomor WhatsApp</span>
+          </div>
+          <div className="field">
+            <label className="field-label" htmlFor="cr-whatsapp">
+              Nomor WhatsApp
+            </label>
             <input
+              id="cr-whatsapp"
               name="whatsapp"
               type="tel"
               inputMode="tel"
@@ -121,10 +125,13 @@ export function CustomRequestForm({ configured }: { configured: boolean }) {
               aria-describedby={describe("whatsapp")}
             />
             {fieldError("whatsapp")}
-          </label>
-          <label className="field">
-            <span>Nama proyek</span>
+          </div>
+          <div className="field">
+            <label className="field-label" htmlFor="cr-project-name">
+              Nama proyek
+            </label>
             <input
+              id="cr-project-name"
               name="project_name"
               required
               maxLength={150}
@@ -133,7 +140,7 @@ export function CustomRequestForm({ configured }: { configured: boolean }) {
               aria-describedby={describe("project_name")}
             />
             {fieldError("project_name")}
-          </label>
+          </div>
         </div>
 
         <fieldset
@@ -152,9 +159,12 @@ export function CustomRequestForm({ configured }: { configured: boolean }) {
           {fieldError("app_type")}
         </fieldset>
 
-        <label className="field">
-          <span>Deskripsi kebutuhan</span>
+        <div className="field">
+          <label className="field-label" htmlFor="cr-description">
+            Deskripsi kebutuhan
+          </label>
           <textarea
+            id="cr-description"
             name="description"
             rows={6}
             required
@@ -164,16 +174,12 @@ export function CustomRequestForm({ configured }: { configured: boolean }) {
             aria-describedby={describe("description")}
           />
           {fieldError("description")}
-        </label>
+        </div>
 
         <div className="hp-field" aria-hidden="true">
           <label>
             Website perusahaan
-            <input
-              name="company_website"
-              tabIndex={-1}
-              autoComplete="off"
-            />
+            <input name="company_website" tabIndex={-1} autoComplete="off" />
           </label>
         </div>
 

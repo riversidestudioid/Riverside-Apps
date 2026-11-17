@@ -62,3 +62,14 @@ Tidak ada push, merge, reset database, migration remote, deploy, atau perubahan 
 ### Masalah regresi yang masih terbuka
 
 Dua putaran Playwright mengalami timeout. Rerun terpisah: 10 lulus, 3 timeout, 5 tidak berjalan; akses media tanpa konfigurasi, filter katalog, dan API admin terdampak. Penyebab belum terkonfirmasi. Tidak ada klaim seluruh pengujian lulus; perbaikan dan rerun masih diperlukan sebelum staging. Lint/typecheck/build/unit/integration adapter dan audit lulus.
+
+## Tambahan v2.0 (17 November 2026) — belum diuji pada layanan asli
+
+Migration `20261117090000_simple_catalog_custom_requests.sql` hanya dieksekusi pada PGlite. Sebelum staging, verifikasi pada Supabase asli:
+
+1. Migration kelima berjalan setelah empat migration lama tanpa error (nama constraint `site_settings_key_check`/`site_settings_value_check` sesuai, bucket `site-assets` terbentuk).
+2. `submit_custom_request` dapat dipanggil role `anon`; `select/insert` langsung ke `custom_requests` ditolak untuk anon dan customer; admin dapat membaca, mengubah `status`/`admin_notes`, dan menghapus.
+3. Rate limit mengembalikan HTTP 429 dengan kode `PT429` melalui PostgREST asli, dan server action menampilkan pesan "Terlalu banyak permintaan".
+4. Di Netlify, header `x-nf-client-connection-ip` tersedia di server action sehingga fingerprint per pengunjung berbeda (bukan IP fungsi Netlify).
+5. Upload logo ke bucket publik `site-assets` (admin), URL publik dapat dibuka, customer/anon ditolak, logo aktif tidak dapat dihapus, file SVG/ekstensi palsu ditolak.
+6. Publish aplikasi tanpa paket harga berhasil setelah ikon diunggah; menyimpan aplikasi lama yang punya paket tidak menghapus baris `plans`.

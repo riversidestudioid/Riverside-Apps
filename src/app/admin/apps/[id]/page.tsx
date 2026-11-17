@@ -5,10 +5,13 @@ import { AppEditor } from "@/components/admin/app-editor";
 
 export default async function EditApp({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ saved?: string }>;
 }) {
   const { id } = await params;
+  const { saved } = await searchParams;
   const { supabase } = await requireAdmin(`/admin/apps/${id}`);
   if (!z.uuid().safeParse(id).success) notFound();
   const [app, categories, media] = await Promise.all([
@@ -25,6 +28,11 @@ export default async function EditApp({
       app={app.data}
       categories={categories.data}
       media={media.data}
+      initialNotice={
+        saved === "1"
+          ? "Draft berhasil disimpan. Lanjutkan dengan mengunggah ikon."
+          : undefined
+      }
     />
   );
 }

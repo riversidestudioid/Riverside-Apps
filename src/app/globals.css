@@ -1006,10 +1006,12 @@ figcaption {
 }
 .field {
   display: grid;
+  align-content: start;
   gap: 6px;
   min-width: 0;
 }
-.field > span {
+.field > span,
+.field > .field-label {
   font-size: 14px;
   font-weight: 650;
   color: var(--navy);
@@ -2021,6 +2023,31 @@ a.list-row:hover {
 .file-button:focus-within {
   outline: 3px solid color-mix(in srgb, var(--teal) 55%, transparent);
   outline-offset: 2px;
+}
+
+/* Single-column grids: tracks must never grow past their container (prevents mobile overflow). */
+.admin-content,
+.admin-section,
+.panel,
+.editor,
+.editor-main,
+.editor-side,
+.settings,
+.category-list,
+.catalog,
+.catalog-toolbar,
+.detail,
+.detail-main,
+.detail-aside,
+.form-stack,
+.form-card,
+.form-card > fieldset,
+.list-rows {
+  grid-template-columns: minmax(0, 1fr);
+}
+.admin-toolbar > *,
+.tabs {
+  min-width: 0;
 }
 
 /* ---------- Responsive ---------- */

@@ -68,7 +68,7 @@ export async function createCatalogApi() {
     }
     if (url.pathname === "/__test/reset" && req.method === "POST") {
       await db.exec(
-        "reset role;truncate apps cascade;truncate storage.objects;",
+        "reset role;truncate apps cascade;truncate storage.objects;truncate custom_requests;truncate private.custom_request_throttle;update site_settings set value='' where key='logo_path';",
       );
       await seedCatalogFixture(db);
       fail = false;

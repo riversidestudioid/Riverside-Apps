@@ -24,18 +24,26 @@ export function AppEditor({
   app,
   categories,
   media,
+  initialNotice,
 }: {
   app?: Application;
   categories: Category[];
   media: Media[];
+  /** Shown after a redirect, e.g. right after a new draft was created. */
+  initialNotice?: string;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
-  const [message, setMessage] = useState<{ tone: "ok" | "error"; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    tone: "ok" | "error";
+    text: string;
+  } | null>(initialNotice ? { tone: "ok", text: initialNotice } : null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [slug, setSlug] = useState(app?.slug ?? "");
   const [slugTouched, setSlugTouched] = useState(Boolean(app));
-  const hasIcon = media.some((m) => m.kind === "icon" || m.kind === "thumbnail");
+  const hasIcon = media.some(
+    (m) => m.kind === "icon" || m.kind === "thumbnail",
+  );
 
   // onSubmit (not a form action) so a failed save never resets the admin's edits.
   function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -43,7 +51,9 @@ export function AppEditor({
     const submitter = (event.nativeEvent as SubmitEvent).submitter;
     const requested = submitter?.getAttribute("data-intent");
     const status: Intent =
-      requested === "published" || requested === "archived" ? requested : "draft";
+      requested === "published" || requested === "archived"
+        ? requested
+        : "draft";
     const form = new FormData(event.currentTarget);
     start(async () => {
       try {
@@ -79,7 +89,7 @@ export function AppEditor({
                   ? "Aplikasi diarsipkan."
                   : "Draft berhasil disimpan.",
           });
-          if (!app) router.replace(`/admin/apps/${result.id}`);
+          if (!app) router.replace(`/admin/apps/${result.id}?saved=1`);
           router.refresh();
         }
       } catch {
@@ -100,7 +110,10 @@ export function AppEditor({
           router.push("/admin/apps");
           router.refresh();
         } else
-          setMessage({ tone: "error", text: result.error ?? "Gagal menghapus." });
+          setMessage({
+            tone: "error",
+            text: result.error ?? "Gagal menghapus.",
+          });
       } catch {
         setMessage({ tone: "error", text: "Gagal menghapus." });
       }
@@ -126,9 +139,12 @@ export function AppEditor({
                   }}
                 />
               </label>
-              <label className="field">
-                <span>Slug URL</span>
+              <div className="field">
+                <label className="field-label" htmlFor="app-slug">
+                  Slug URL
+                </label>
                 <input
+                  id="app-slug"
                   name="slug"
                   value={slug}
                   onChange={(e) => {
@@ -141,10 +157,13 @@ export function AppEditor({
                   aria-describedby="slug-help"
                 />
                 <small id="slug-help">/apps/{slug || "nama-aplikasi"}</small>
-              </label>
+              </div>
               <label className="field">
                 <span>Kategori</span>
-                <select name="category_id" defaultValue={app?.category_id ?? ""}>
+                <select
+                  name="category_id"
+                  defaultValue={app?.category_id ?? ""}
+                >
                   <option value="">Pilih kategori</option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -165,19 +184,28 @@ export function AppEditor({
             </div>
             <label className="field">
               <span>Tagline (opsional)</span>
-              <input name="tagline" defaultValue={app?.tagline} maxLength={200} />
+              <input
+                name="tagline"
+                defaultValue={app?.tagline}
+                maxLength={200}
+              />
             </label>
-            <label className="field">
-              <span>Deskripsi singkat</span>
+            <div className="field">
+              <label className="field-label" htmlFor="app-short-description">
+                Deskripsi singkat
+              </label>
               <textarea
+                id="app-short-description"
                 name="short_description"
                 rows={2}
                 defaultValue={app?.short_description}
                 maxLength={500}
                 aria-describedby="short-help"
               />
-              <small id="short-help">Tampil di kartu katalog. Maksimal 500 karakter.</small>
-            </label>
+              <small id="short-help">
+                Tampil di kartu katalog. Maksimal 500 karakter.
+              </small>
+            </div>
             <label className="field">
               <span>Deskripsi lengkap</span>
               <textarea
@@ -286,17 +314,27 @@ export function AppEditor({
                   : "Publish memerlukan kategori, deskripsi lengkap minimal 20 karakter, URL aplikasi HTTPS, dan ikon."}
             </p>
             {app && !hasIcon && (
-              <p className="notice notice-warn">Belum ada ikon. Unggah ikon pada bagian Media.</p>
+              <p className="notice notice-warn">
+                Belum ada ikon. Unggah ikon pada bagian Media.
+              </p>
             )}
             {app?.status === "published" && (
-              <Link className="text-link" href={`/apps/${app.slug}`} target="_blank">
+              <Link
+                className="text-link"
+                href={`/apps/${app.slug}`}
+                target="_blank"
+              >
                 Lihat di website <ExternalLink size={15} aria-hidden="true" />
               </Link>
             )}
           </fieldset>
           <p
             role="status"
-            className={message ? `form-${message.tone === "ok" ? "ok" : "alert"}` : "sr-only"}
+            className={
+              message
+                ? `form-${message.tone === "ok" ? "ok" : "alert"}`
+                : "sr-only"
+            }
           >
             {pending ? "Menyimpan..." : (message?.text ?? "")}
           </p>
@@ -323,7 +361,11 @@ export function AppEditor({
                 <Trash2 size={17} aria-hidden="true" /> Hapus Aplikasi
               </button>
             ) : (
-              <div className="confirm-row" role="group" aria-label="Konfirmasi hapus">
+              <div
+                className="confirm-row"
+                role="group"
+                aria-label="Konfirmasi hapus"
+              >
                 <span>Hapus &ldquo;{app.name}&rdquo; secara permanen?</span>
                 <button
                   type="button"

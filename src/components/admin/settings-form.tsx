@@ -8,7 +8,11 @@ import {
   socialLabels,
   type SiteSettings,
 } from "@/lib/admin/settings-validation";
-import { removeLogo, saveLogo, saveSettings } from "@/app/admin/settings/actions";
+import {
+  removeLogo,
+  saveLogo,
+  saveSettings,
+} from "@/app/admin/settings/actions";
 import { createClient } from "@/lib/supabase/client";
 import { BrandMark } from "@/components/brand";
 
@@ -29,7 +33,9 @@ const logoTypes: Record<string, string> = {
 export function SettingsForm({ settings }: { settings: SiteSettings }) {
   const router = useRouter();
   const [pending, start] = useTransition();
-  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(
+    null,
+  );
   const [logoMessage, setLogoMessage] = useState("");
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -38,7 +44,9 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
       try {
         const ext = logoTypes[file.type];
         if (!ext || file.size <= 0 || file.size > 2 * 1024 * 1024) {
-          setLogoMessage("Gunakan PNG, JPG, atau WebP dengan ukuran maksimal 2 MB.");
+          setLogoMessage(
+            "Gunakan PNG, JPG, atau WebP dengan ukuran maksimal 2 MB.",
+          );
           return;
         }
         const path = `logo/${crypto.randomUUID()}.${ext}`;
@@ -69,7 +77,13 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
         <div className="logo-row">
           <span className="logo-preview">
             {settings.logoUrl ? (
-              <Image unoptimized src={settings.logoUrl} alt="Logo saat ini" width={72} height={72} />
+              <Image
+                unoptimized
+                src={settings.logoUrl}
+                alt="Logo saat ini"
+                width={72}
+                height={72}
+              />
             ) : (
               <BrandMark />
             )}
@@ -98,7 +112,9 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
                 onClick={() =>
                   start(async () => {
                     const r = await removeLogo();
-                    setLogoMessage(r.error ?? "Logo dihapus. Logo bawaan digunakan.");
+                    setLogoMessage(
+                      r.error ?? "Logo dihapus. Logo bawaan digunakan.",
+                    );
                     if (r.ok) router.refresh();
                   })
                 }
@@ -106,7 +122,9 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
                 <Trash2 size={16} aria-hidden="true" /> Gunakan Logo Bawaan
               </button>
             )}
-            <p className="help-text">PNG, JPG, atau WebP persegi, maksimal 2 MB.</p>
+            <p className="help-text">
+              PNG, JPG, atau WebP persegi, maksimal 2 MB.
+            </p>
             <p role="status" className={logoMessage ? "notice" : "sr-only"}>
               {logoMessage}
             </p>
@@ -123,7 +141,10 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
             try {
               const result = await saveSettings(
                 Object.fromEntries(
-                  textKeys.map((key) => [key, String(form.get(key) ?? "").trim()]),
+                  textKeys.map((key) => [
+                    key,
+                    String(form.get(key) ?? "").trim(),
+                  ]),
                 ),
               );
               setMessage(
@@ -133,7 +154,10 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
               );
               if (!result.error) router.refresh();
             } catch {
-              setMessage({ ok: false, text: "Pengaturan belum dapat disimpan." });
+              setMessage({
+                ok: false,
+                text: "Pengaturan belum dapat disimpan.",
+              });
             }
           });
         }}
@@ -143,23 +167,39 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
           <div className="form-grid">
             <label className="field">
               <span>Nama website</span>
-              <input name="site_name" defaultValue={settings.site_name} maxLength={60} required />
+              <input
+                name="site_name"
+                defaultValue={settings.site_name}
+                maxLength={60}
+                required
+              />
             </label>
             <label className="field">
               <span>Subteks identitas</span>
-              <input name="tagline" defaultValue={settings.tagline} maxLength={100} required />
+              <input
+                name="tagline"
+                defaultValue={settings.tagline}
+                maxLength={100}
+                required
+              />
             </label>
           </div>
-          <label className="field">
-            <span>Deskripsi website</span>
+          <div className="field">
+            <label className="field-label" htmlFor="site-description">
+              Deskripsi website
+            </label>
             <textarea
+              id="site-description"
               name="site_description"
               rows={3}
               defaultValue={settings.site_description}
               maxLength={300}
+              aria-describedby="site-description-help"
             />
-            <small>Tampil di footer. Maksimal 300 karakter.</small>
-          </label>
+            <small id="site-description-help">
+              Tampil di footer. Maksimal 300 karakter.
+            </small>
+          </div>
 
           <h3 className="panel-subtitle">Kontak Resmi</h3>
           <div className="form-grid">
@@ -172,18 +212,25 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
                 maxLength={200}
               />
             </label>
-            <label className="field">
-              <span>WhatsApp bisnis</span>
+            <div className="field">
+              <label className="field-label" htmlFor="support-whatsapp">
+                WhatsApp bisnis
+              </label>
               <input
+                id="support-whatsapp"
                 name="support_whatsapp"
                 defaultValue={settings.support_whatsapp}
                 maxLength={15}
                 inputMode="numeric"
                 pattern="[1-9][0-9]{7,14}"
                 placeholder="628123456789"
+                aria-describedby="support-whatsapp-help"
               />
-              <small>Format internasional tanpa +. Kosongkan jika belum ada nomor resmi.</small>
-            </label>
+              <small id="support-whatsapp-help">
+                Format internasional tanpa +. Kosongkan jika belum ada nomor
+                resmi.
+              </small>
+            </div>
           </div>
 
           <h3 className="panel-subtitle">Sosial Media</h3>
@@ -213,7 +260,9 @@ export function SettingsForm({ settings }: { settings: SiteSettings }) {
             </button>
             <p
               role="status"
-              className={message ? (message.ok ? "form-ok" : "form-alert") : "sr-only"}
+              className={
+                message ? (message.ok ? "form-ok" : "form-alert") : "sr-only"
+              }
             >
               {message?.text ?? ""}
             </p>
