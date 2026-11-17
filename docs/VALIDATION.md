@@ -1,3 +1,21 @@
+# Aktivasi production — 17 November 2026
+
+Atas persetujuan pemilik, situs dideploy dan disambungkan ke Supabase asli.
+
+| Item | Hasil |
+| --- | --- |
+| Netlify | Situs `riversideid` (dulu `jade-fox-9bf4a7`, sebelumnya upload manual Netlify Drop). Deploy production via Netlify CLI dari commit `5135911`, deploy `6afc15e705ad1e1bfb15e059`. Rollback: deploy `6afaaf63c7637069c203d17a` (16 Nov). Belum terhubung ke GitHub. |
+| Env Netlify | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` saja (tanpa service role key). |
+| Supabase | Proyek `qlacgysqrjsgclagrqce` (RiverSideStudio.id, Tokyo). Kelima migration dijalankan pemilik lewat SQL Editor dalam satu skrip (bukan `supabase db push`). Jika kelak memakai CLI, tandai dulu dengan `supabase migration repair --status applied 20261116081145 20261116085506 20261116090337 20261116092711 20261117090000`. |
+| PostgREST asli (publishable key) | 7 kategori dan 11 settings terbaca; `catalog_apps` berjalan; anon ditolak membaca `custom_requests`, menulis `apps`, dan membaca kolom `site_settings.updated_by` (42501); `submit_custom_request` menolak tanpa persetujuan privasi (22023). |
+| Situs live | Beranda/katalog/detail/custom/legal/login 200; kategori dari database tampil; form custom dan login aktif; `/admin` dialihkan ke login; API admin 401; tidak ada overflow di 375 px. |
+| Auth asli | Pemilik berhasil login sebagai admin (`admin_members`). |
+| Bug ditemukan | Build dengan env Supabase gagal karena beranda di-prerender (`fetch` no-store). Diperbaiki dengan `connection()` (commit `5135911`, PR #5). |
+
+Belum diverifikasi pada layanan asli: upload/ganti/hapus media dan logo ke Storage, kiriman form custom sukses beserta rate limit `PT429`, header `x-nf-client-connection-ip` di Netlify, refresh/kedaluwarsa sesi. Pendaftaran publik Supabase Auth perlu dimatikan pemilik (Authentication → Sign In / Providers).
+
+---
+
 # Validasi v2.0 Simple Redesign — 17 November 2026
 
 Branch lokal `feature/ui-ux-redesign` (basis `feature/catalog-admin` 66a6917), di-push ke `origin/feature/ui-ux` atas persetujuan pemilik. Tidak ada merge, migration remote, atau deploy production. Detail perubahan: [REDESIGN_V2.md](REDESIGN_V2.md).

@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { connection } from "next/server";
 import { createPublicClient } from "@/lib/supabase/public";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import {
@@ -13,6 +14,8 @@ const fallback: SiteSettings = { ...defaultSettings, logoUrl: null };
 
 export const getSiteSettings = cache(async (): Promise<SiteSettings> => {
   if (!hasSupabaseEnv()) return fallback;
+  // Settings are live database data: render at request time, never at build time.
+  await connection();
   const { data, error } = await createPublicClient()
     .from("site_settings")
     .select("key,value")

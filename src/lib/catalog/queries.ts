@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { connection } from "next/server";
 import { createPublicClient } from "@/lib/supabase/public";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import {
@@ -13,8 +14,14 @@ import { catalogParams } from "./validation";
 
 export const catalogPageSize = 12;
 
+// Catalog data lives in the database: wait for a request instead of prerendering at build time.
+async function liveClient() {
+  await connection();
+  return createPublicClient();
+}
+
 export const getCategories = cache(async (): Promise<CategoryOption[]> =>
-  hasSupabaseEnv() ? loadCategories(createPublicClient()) : [allCategory],
+  hasSupabaseEnv() ? loadCategories(await liveClient()) : [allCategory],
 );
 
 export async function getCatalog(
@@ -32,7 +39,7 @@ export async function getCatalog(
       configured: false,
     } satisfies CatalogPage & { categories: CategoryOption[] };
   const [result, categories] = await Promise.all([
-    loadCatalog(createPublicClient(), input, {
+    loadCatalog(await liveClient(), input, {
       pageSize: catalogPageSize,
       ...options,
     }),
@@ -49,5 +56,5 @@ export async function getFeaturedApps(limit = 6) {
 }
 
 export const getProduct = cache(async (slug: string) =>
-  hasSupabaseEnv() ? loadProduct(createPublicClient(), slug) : null,
+  hasSupabaseEnv() ? loadProduct(await liveClient(), slug) : null,
 );
