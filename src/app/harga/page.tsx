@@ -1,18 +1,40 @@
 import Link from "next/link";
-export const metadata = { title: "Model Akses & Harga" };
-export default function Page() {
+import { getCatalog } from "@/lib/catalog/queries";
+import { formatPrice } from "@/lib/catalog/validation";
+export const metadata = { title: "Pilihan Harga" };
+export default async function Prices() {
+  const data = await getCatalog();
+  const apps = data.apps.filter(
+    (a) => a.status === "published" && a.plans?.length,
+  );
   return (
     <main id="main" className="content-page container">
-      <span className="ecosystem">Dalam persiapan</span>
-      <h1>Model Akses & Harga</h1>
+      <h1>Pilihan Harga Aplikasi</h1>
       <p>
-        Aplikasi dapat menawarkan akses gratis, sekali beli, atau langganan.
-        Harga dan ketentuan akan ditampilkan setelah paket resmi dipublikasikan.
-        Pembayaran belum tersedia.
+        Pilih akses gratis, sekali beli, bulanan, atau tahunan sesuai paket yang
+        dipublikasikan. Pembayaran belum tersedia.
       </p>
-      <Link href="/apps" className="button">
-        Jelajahi Aplikasi
-      </Link>
+      {apps.length ? (
+        <div className="pricing-grid">
+          {apps.map((a) => (
+            <article className="product-card" key={a.slug}>
+              <h2>{a.name}</h2>
+              {a.plans?.map((p) => (
+                <p key={p.id}>
+                  {p.name}: {formatPrice(p.price_idr, p.billing_type)}
+                </p>
+              ))}
+              <Link className="button secondary" href={`/apps/${a.slug}`}>
+                Lihat Detail
+              </Link>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <p className="empty-state">
+          Belum ada paket harga resmi yang dipublikasikan.
+        </p>
+      )}
     </main>
   );
 }

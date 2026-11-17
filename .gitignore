@@ -44,3 +44,10 @@ next-env.d.ts
 /artifacts/
 /test-results/
 /playwright-report/
+
+# Supabase local state
+/supabase/.temp/
+/supabase/.branches/
+
+/.next-test-*/
+/.test-runtime/
