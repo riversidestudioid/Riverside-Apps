@@ -62,24 +62,25 @@ export function AppCard({
     categories.find((c) => c.slug === app.category)?.name ?? app.category;
   return (
     <article className="app-card">
-      <div className="app-card-head">
-        <AppIcon
-          mediaId={app.iconId ?? app.thumbnailId}
-          fallbackIcon={app.icon}
-          seed={app.slug}
-        />
-        <div className="app-card-title">
-          <Heading>{app.name}</Heading>
-          <span className="chip">{category}</span>
-        </div>
+      <AppIcon
+        mediaId={app.iconId ?? app.thumbnailId}
+        fallbackIcon={app.icon}
+        seed={app.slug}
+        size={72}
+      />
+      <div className="app-card-body">
+        <Heading>{app.name}</Heading>
+        <p className="app-card-desc">{app.description || app.tagline}</p>
+        <span className="app-card-category">{category}</span>
       </div>
-      <p className="app-card-desc">{app.description || app.tagline}</p>
+      {/* The whole card is clickable through this link's ::after overlay. */}
       <Link
-        className="app-card-link"
+        className="app-card-arrow"
         href={`/apps/${app.slug}`}
         aria-label={`Lihat detail ${app.name}`}
+        title="Lihat Detail"
       >
-        Lihat Detail <ArrowRight size={17} aria-hidden="true" />
+        <ArrowRight size={20} aria-hidden="true" />
       </Link>
     </article>
   );

@@ -50,11 +50,19 @@ Migration baru: `supabase/migrations/20261117090000_simple_catalog_custom_reques
 - Pengaturan: nama, subteks, deskripsi, logo (upload + verifikasi signature di server), email, WhatsApp, 5 sosial media.
 - `/admin/plans` → `/admin/apps`. Kategori & File Media tetap tersedia sebagai sub-halaman Aplikasi.
 
+### Penyesuaian ke gambar referensi (17 November 2026, lanjutan)
+
+Atas permintaan pemilik agar hasil semirip gambar referensi, beberapa poin instruksi tertulis dilonggarkan:
+- Ilustrasi laptop SVG (`src/components/hero-laptop.tsx`, dari `feature/catalog-admin`) dikembalikan di sisi kanan hero; tetap SVG inline tanpa gambar eksternal, dan tampil lebih kecil di bawah hero pada mobile.
+- Kartu aplikasi menjadi horizontal seperti referensi: ikon, nama, deskripsi singkat, kategori, dan tombol panah bulat ("Lihat detail …"); seluruh kartu dapat diklik.
+- Urutan statistik dashboard mengikuti referensi (Total Aplikasi, Permintaan Custom, Published, Draft) dan ikon menu Aplikasi berbentuk kotak.
+- Tetap tidak ada ikon lonceng notifikasi karena belum ada fitur notifikasi nyata. Label tombol hero mengikuti instruksi tertulis ("Pesan Aplikasi Custom").
+
 ### Dipertahankan
 Supabase SSR auth (`proxy.ts`, `getClaims`, `admin_members`), RLS, media privat + signed URL 60 detik, verifikasi upload (MIME/ekstensi/ukuran/signature), audit log, `/api/admin/apps`, pencarian RPC `catalog_apps`, konfigurasi Netlify, seluruh test sebelumnya (diperbarui untuk UI baru).
 
 ### Dihapus dari kode (dapat dipulihkan dari `checkpoint/pre-simple-redesign`)
-`src/components/site-shell.tsx` (diganti `site-header`, `site-footer`, `brand`), `src/components/hero-laptop.tsx` (ilustrasi laptop tidak dipakai), CSS lama (ditulis ulang). `src/app/login/actions.ts` dipindah ke `src/lib/admin/auth-actions.ts`. PRD v1.1 dipindah ke `docs/archive/`.
+`src/components/site-shell.tsx` (diganti `site-header`, `site-footer`, `brand`), CSS lama (ditulis ulang). `src/app/login/actions.ts` dipindah ke `src/lib/admin/auth-actions.ts`. PRD v1.1 dipindah ke `docs/archive/`.
 
 ## Catatan keamanan
 
