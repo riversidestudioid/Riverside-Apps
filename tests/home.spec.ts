@@ -12,18 +12,33 @@ for (const width of [375, 768, 1024, 1440]) {
         name: "Solusi Aplikasi & Web App untuk Kebutuhanmu.",
       }),
     ).toBeVisible();
+    // Exactly two primary services, each with one action.
+    const services = page.getByRole("region", { name: "Layanan utama" });
     await expect(
-      page.getByRole("link", { name: "Jelajahi Aplikasi" }),
+      services.getByRole("heading", { level: 2, name: "Jelajahi Aplikasi" }),
+    ).toBeVisible();
+    await expect(
+      services.getByRole("heading", { level: 2, name: "Buat Aplikasi Custom" }),
+    ).toBeVisible();
+    await expect(services.getByRole("link")).toHaveCount(2);
+    await expect(
+      services.getByRole("link", { name: "Lihat aplikasi" }),
     ).toHaveAttribute("href", "/apps");
     await expect(
-      page.getByRole("link", { name: "Pesan Aplikasi Custom" }).first(),
+      services.getByRole("link", { name: "Pesan aplikasi" }),
     ).toHaveAttribute("href", "/custom");
+    // Without published products there is no featured section and no repeated CTA banner.
     await expect(
       page.getByRole("heading", { name: "Aplikasi Pilihan" }),
-    ).toBeVisible();
+    ).toHaveCount(0);
     await expect(
       page.getByRole("heading", { name: "Butuh Aplikasi Sesuai Kebutuhan?" }),
-    ).toBeVisible();
+    ).toHaveCount(0);
+    const [left, right] = await services.locator(".service-card").all();
+    const a = (await left.boundingBox())!;
+    const b = (await right.boundingBox())!;
+    if (width >= 768) expect(Math.abs(a.y - b.y)).toBeLessThan(2);
+    else expect(b.y).toBeGreaterThan(a.y + a.height - 1);
     expect(await page.evaluate(noOverflow)).toBe(true);
     await page.screenshot({
       path: `artifacts/home-${width}.png`,
@@ -32,22 +47,33 @@ for (const width of [375, 768, 1024, 1440]) {
   });
 }
 
-test("header has only Beranda, Aplikasi, Custom and admin login; legacy routes redirect", async ({
+test("header is logo, Aplikasi and Custom; admin login stays reachable from the footer", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/");
+  const header = page.locator(".site-header");
   const nav = page.getByRole("navigation", { name: "Navigasi utama" });
-  await expect(nav.getByRole("link", { name: "Beranda" })).toHaveAttribute(
+  await expect(nav.getByRole("link")).toHaveText(["Aplikasi", "Custom"]);
+  await expect(
+    header.getByRole("link", { name: /Riverside Apps/ }),
+  ).toHaveAttribute("href", "/");
+  await expect(header.getByRole("button")).toHaveCount(0);
+  for (const hidden of ["Beranda", "Masuk", "Harga", "Daftar", "Buat Akun"])
+    await expect(header.getByRole("link", { name: hidden })).toHaveCount(0);
+  await expect(
+    page.locator(".site-footer").getByRole("link", { name: "Admin" }),
+  ).toHaveAttribute("href", "/login");
+  await expect(page.getByText(/Rp\s*\d/)).toHaveCount(0);
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute(
+    "content",
+    /aplikasi custom/,
+  );
+  await page.goto("/apps");
+  await expect(nav.getByRole("link", { name: "Aplikasi" })).toHaveAttribute(
     "aria-current",
     "page",
   );
-  for (const hidden of ["Harga", "Daftar", "Buat Akun"])
-    await expect(page.getByRole("link", { name: hidden })).toHaveCount(0);
-  await expect(
-    page.getByRole("link", { name: "Masuk", exact: true }),
-  ).toHaveAttribute("href", "/login");
-  await expect(page.getByText(/Rp\s*\d/)).toHaveCount(0);
   await page.goto("/harga");
   await expect(page).toHaveURL(/\/apps$/);
   await page.goto("/register");
@@ -70,9 +96,6 @@ test("unconfigured catalog is empty, keeps shareable search and supports shortcu
 }) => {
   await page.goto("/");
   await expect(page.locator(".app-card")).toHaveCount(0);
-  await expect(
-    page.getByRole("heading", { name: "Aplikasi segera hadir" }),
-  ).toBeVisible();
   await page.goto("/apps");
   await expect(
     page.getByRole("heading", { name: "Katalog sedang dipersiapkan" }),
@@ -95,12 +118,11 @@ test("unconfigured catalog is empty, keeps shareable search and supports shortcu
   ).toBeFocused();
 });
 
-test("mobile menu navigates to the custom form, which is disabled without a database", async ({
+test("mobile header links navigate to the custom form, which is disabled without a database", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 375, height: 900 });
   await page.goto("/");
-  await page.getByRole("button", { name: "Buka menu" }).click();
   await page
     .getByRole("navigation", { name: "Navigasi utama" })
     .getByRole("link", { name: "Custom", exact: true })
