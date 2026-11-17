@@ -59,6 +59,32 @@ export type Media = {
   alt_text: string;
   sort_order: number;
 };
+export type CustomRequestStatus =
+  | "new"
+  | "contacted"
+  | "discussion"
+  | "accepted"
+  | "completed"
+  | "rejected";
+export type CustomRequestAppType =
+  | "website"
+  | "web_app"
+  | "mobile_app"
+  | "desktop_app";
+export type CustomRequest = {
+  id: string;
+  name: string;
+  email: string;
+  whatsapp: string;
+  app_type: CustomRequestAppType;
+  project_name: string;
+  description: string;
+  privacy_consent_at: string;
+  status: CustomRequestStatus;
+  admin_notes: string;
+  created_at: string;
+  updated_at: string;
+};
 type Table<T> = {
   Row: T;
   Insert: Partial<T>;
@@ -83,6 +109,12 @@ export type Database = {
         updated_by: string | null;
       }>;
       apps: Table<Application>;
+      custom_requests: {
+        Row: CustomRequest;
+        Insert: never;
+        Update: { status?: CustomRequestStatus; admin_notes?: string };
+        Relationships: [];
+      };
       plans: Table<Plan>;
       app_media: Table<Media>;
       admin_members: Table<{ user_id: string; created_at: string }>;
@@ -112,6 +144,7 @@ export type Database = {
       save_site_settings: { Args: { payload: Json }; Returns: undefined };
       save_catalog_media: { Args: { payload: Json }; Returns: string };
       save_catalog_app: { Args: { payload: Json }; Returns: string };
+      submit_custom_request: { Args: { payload: Json }; Returns: string };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

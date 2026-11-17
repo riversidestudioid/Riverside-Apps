@@ -8,11 +8,15 @@ import {
   loadProduct,
   type CatalogPage,
 } from "./repository";
-import { allCategory } from "./data";
+import { allCategory, type CategoryOption } from "./data";
 import { catalogParams } from "./validation";
-export const getCategories = cache(async () =>
+
+export const catalogPageSize = 12;
+
+export const getCategories = cache(async (): Promise<CategoryOption[]> =>
   hasSupabaseEnv() ? loadCategories(createPublicClient()) : [allCategory],
 );
+
 export async function getCatalog(
   input: Record<string, string | string[] | undefined> = {},
   options: { featured?: boolean; pageSize?: number } = {},
@@ -24,15 +28,26 @@ export async function getCatalog(
       categories: [allCategory],
       total: 0,
       page: params.page,
-      pageSize: options.pageSize ?? 24,
+      pageSize: options.pageSize ?? catalogPageSize,
       configured: false,
-    } satisfies CatalogPage & { categories: (typeof allCategory)[] };
+    } satisfies CatalogPage & { categories: CategoryOption[] };
   const [result, categories] = await Promise.all([
-    loadCatalog(createPublicClient(), input, options),
+    loadCatalog(createPublicClient(), input, {
+      pageSize: catalogPageSize,
+      ...options,
+    }),
     getCategories(),
   ]);
   return { ...result, categories };
 }
+
+/** Featured apps for the homepage; falls back to the newest published apps when none are featured. */
+export async function getFeaturedApps(limit = 6) {
+  const featured = await getCatalog({}, { featured: true, pageSize: limit });
+  if (featured.apps.length > 0 || !featured.configured) return featured;
+  return getCatalog({ sort: "newest" }, { pageSize: limit });
+}
+
 export const getProduct = cache(async (slug: string) =>
   hasSupabaseEnv() ? loadProduct(createPublicClient(), slug) : null,
 );

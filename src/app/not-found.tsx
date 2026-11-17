@@ -1,12 +1,11 @@
-import Link from "next/link";
+import { SiteChrome } from "@/components/site-chrome";
+import SiteNotFound from "./(site)/not-found";
+
+// Unmatched URLs render outside the (site) group, so the public chrome is added here.
 export default function NotFound() {
   return (
-    <main id="main" className="content-page container">
-      <h1>Halaman tidak ditemukan</h1>
-      <p>Halaman atau aplikasi ini belum tersedia.</p>
-      <Link href="/" className="button">
-        Kembali ke Beranda
-      </Link>
-    </main>
+    <SiteChrome>
+      <SiteNotFound />
+    </SiteChrome>
   );
 }

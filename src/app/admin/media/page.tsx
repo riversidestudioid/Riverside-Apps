@@ -1,6 +1,9 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { requireAdmin } from "@/lib/admin/auth";
 import { MediaManager } from "@/components/admin/media-manager";
+
 export default async function MediaPage({
   searchParams,
 }: {
@@ -15,11 +18,18 @@ export default async function MediaPage({
   if (error) throw new Error("Daftar media belum dapat dimuat.");
   const app = apps.find((a) => a.id === (params.app ?? apps[0]?.id));
   if (params.app && !app) notFound();
+  const back = (
+    <div className="admin-toolbar">
+      <Link className="back-link" href="/admin/apps">
+        <ArrowLeft size={17} aria-hidden="true" /> Kembali ke Aplikasi
+      </Link>
+    </div>
+  );
   if (!app)
     return (
       <>
-        <h1>Kelola Media</h1>
-        <p className="empty-state">
+        {back}
+        <p className="panel panel-empty">
           Tambahkan aplikasi terlebih dahulu untuk mengelola media.
         </p>
       </>
@@ -39,10 +49,10 @@ export default async function MediaPage({
     .map((f) => app.id + "/" + f.name);
   return (
     <>
-      <h1>Kelola Media</h1>
-      <form className="editor-form form-grid" action="/admin/media">
-        <label>
-          Pilih aplikasi
+      {back}
+      <form className="panel inline-form" action="/admin/media">
+        <label className="field">
+          <span>Pilih aplikasi</span>
           <select name="app" defaultValue={app.id}>
             {apps.map((a) => (
               <option key={a.id} value={a.id}>
@@ -51,10 +61,10 @@ export default async function MediaPage({
             ))}
           </select>
         </label>
-        <button className="button">Tampilkan Media</button>
+        <button className="button button-outline">Tampilkan</button>
       </form>
       {storageError && (
-        <p className="notice">
+        <p className="notice notice-warn">
           Daftar file Storage belum dapat dimuat. Media yang terdaftar tetap
           ditampilkan.
         </p>

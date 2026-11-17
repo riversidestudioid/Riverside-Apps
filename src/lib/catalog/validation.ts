@@ -8,11 +8,26 @@ export const billingLabels = {
 export function httpsUrl(value: string) {
   try {
     const u = new URL(value);
-    return u.protocol === "https:" && !u.username && !u.password;
+    return (
+      u.protocol === "https:" &&
+      !u.username &&
+      !u.password &&
+      Boolean(u.hostname) &&
+      !/\s/.test(value)
+    );
   } catch {
     return false;
   }
 }
+/** Returns the URL only if it is a safe external HTTPS link, otherwise null. */
+export function safeExternalUrl(value: string | null | undefined) {
+  return value && httpsUrl(value) ? value : null;
+}
+export const platformLabels = {
+  web: "Web App",
+  desktop: "Desktop",
+  mobile: "Mobile",
+} as const;
 export function youtubeId(value: string) {
   try {
     const u = new URL(value);
@@ -81,7 +96,8 @@ export const appSchema = z
     featured_order: z.number().int().min(0).max(10000),
     demo_url: url,
     launch_url: url,
-    plans: z.array(planSchema).max(12),
+    // Legacy pricing data. v2 editors omit this key so existing plans stay untouched.
+    plans: z.array(planSchema).max(12).optional(),
   })
   .superRefine((a, ctx) => {
     if (
@@ -89,18 +105,12 @@ export const appSchema = z
       (!a.is_visible ||
         !a.category_id ||
         a.description.length < 20 ||
-        !a.launch_url ||
-        !a.plans.some((p) => p.is_active) ||
-        a.plans.some(
-          (p) =>
-            p.is_active &&
-            (p.price_idr === null || p.license_policy.length < 5),
-        ))
+        !a.launch_url)
     )
       ctx.addIssue({
         code: "custom",
         message:
-          "Publikasi memerlukan kategori aktif, deskripsi, URL aplikasi, visibilitas, dan harga serta lisensi paket aktif yang lengkap.",
+          "Publikasi memerlukan kategori, deskripsi lengkap minimal 20 karakter, dan URL aplikasi HTTPS.",
       });
   });
 export type AppInput = z.infer<typeof appSchema>;
