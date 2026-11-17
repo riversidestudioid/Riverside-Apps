@@ -1,4 +1,5 @@
 import {
+  Headphones,
   Grid2X2,
   Church,
   GraduationCap,
@@ -14,6 +15,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 const icons = {
+  headphones: Headphones,
   grid: Grid2X2,
   church: Church,
   education: GraduationCap,

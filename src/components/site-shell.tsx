@@ -1,22 +1,47 @@
 "use client";
+import {
+  defaultSettings,
+  type PublicSettings,
+} from "@/lib/admin/settings-validation";
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, X, Search, ChevronDown } from "lucide-react";
-import { categories } from "@/lib/catalog/data";
-export function Brand() {
+import { Menu, X, Search } from "lucide-react";
+import type { CategoryOption } from "@/lib/catalog/data";
+export function Brand({
+  settings = defaultSettings,
+}: {
+  settings?: PublicSettings;
+}) {
   return (
     <Link href="/" className="brand">
-      <span>Riverside Apps</span>
-      <small>by Riverside Studio</small>
+      <svg className="brand-mark" viewBox="0 0 56 58" aria-hidden="true">
+        <defs>
+          <linearGradient id="brand-gradient" x2="1" y2="1">
+            <stop stopColor="#00b7aa" />
+            <stop offset="1" stopColor="#006575" />
+          </linearGradient>
+        </defs>
+        <path
+          d="M14 3H34C59 3 60 33 37 36L54 54H37L17 32H28C43 32 45 16 30 16H12C1 16 2 3 14 3ZM8 26Q18 20 23 21L18 49Q14 56 2 56L5 35Q5 29 8 26Z"
+          fill="url(#brand-gradient)"
+        />
+      </svg>
+      <span>{settings.site_name}</span>
+      <small>{settings.tagline}</small>
     </Link>
   );
 }
-export function SiteHeader() {
+export function SiteHeader({
+  settings = defaultSettings,
+}: {
+  categories?: CategoryOption[];
+  settings?: PublicSettings;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <header className="site-header">
       <div className="header-inner">
-        <Brand />
+        <Brand settings={settings} />
         <nav
           aria-label="Navigasi utama"
           className={open ? "navigation is-open" : "navigation"}
@@ -25,29 +50,13 @@ export function SiteHeader() {
             Beranda
           </Link>
           <Link href="/apps" onClick={() => setOpen(false)}>
-            Jelajahi Aplikasi
+            Aplikasi
           </Link>
-          <details>
-            <summary>
-              Kategori <ChevronDown size={15} />
-            </summary>
-            <div className="dropdown">
-              {categories.slice(1).map((c) => (
-                <Link
-                  key={c.slug}
-                  href={`/apps?category=${c.slug}`}
-                  onClick={() => setOpen(false)}
-                >
-                  {c.name}
-                </Link>
-              ))}
-            </div>
-          </details>
           <Link href="/harga" onClick={() => setOpen(false)}>
             Harga
           </Link>
           <Link href="/custom" onClick={() => setOpen(false)}>
-            Pesan Custom
+            Custom
           </Link>
         </nav>
         <div className="header-actions">
@@ -62,7 +71,7 @@ export function SiteHeader() {
             Masuk
           </Link>
           <Link href="/register" className="button small">
-            Daftar
+            Buat Akun
           </Link>
         </div>
         <button
@@ -77,17 +86,37 @@ export function SiteHeader() {
     </header>
   );
 }
-export function SiteFooter() {
+export function SiteFooter({
+  settings = defaultSettings,
+}: {
+  settings?: PublicSettings;
+}) {
   return (
     <footer className="site-footer container">
-      <Brand />
+      <Brand settings={settings} />
       <nav aria-label="Navigasi footer">
         <Link href="/apps">Aplikasi</Link>
         <Link href="/custom">Pesan Custom</Link>
         <Link href="/privacy">Privasi</Link>
         <Link href="/terms">Syarat Layanan</Link>
       </nav>
-      <small>© {new Date().getFullYear()} Riverside Studio</small>
+      <div>
+        {settings.support_email && (
+          <a href={`mailto:${settings.support_email}`}>
+            {settings.support_email}
+          </a>
+        )}
+        {settings.support_whatsapp && (
+          <a
+            href={`https://wa.me/${settings.support_whatsapp}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            WhatsApp
+          </a>
+        )}
+        <small>© {new Date().getFullYear()} Riverside Studio</small>
+      </div>
     </footer>
   );
 }
