@@ -81,7 +81,7 @@ Harga, pembayaran, akun pelanggan, dan lisensi dikelola **di masing-masing aplik
 ### FR-01 Beranda (disederhanakan, 17 November 2026)
 Tujuan: pengunjung langsung mengerti dua fungsi website.
 - **Header:** logo (ke beranda), **Aplikasi**, **Custom**. Tanpa menu Beranda, Harga, Daftar, maupun tombol Masuk.
-- **Hero text-first:** judul "Solusi Aplikasi & Web App untuk Kebutuhanmu." dan satu kalimat penjelas. Tanpa ilustrasi dan tanpa tombol CTA (aksi ada di kartu layanan).
+- **Hero text-first:** judul "Aplikasi Sederhana, Manfaat Nyata." dan kalimat penjelas "Temukan berbagai aplikasi dan web app yang dirancang untuk mempermudah aktivitas, membantu menyelesaikan masalah, dan memberikan solusi bagi kebutuhan sehari-hari." Tanpa ilustrasi dan tanpa tombol CTA (aksi ada di kartu layanan).
 - **Dua kartu layanan utama**, berdampingan di desktop/tablet dan bertumpuk di mobile:
   1. **Jelajahi Aplikasi** → `/apps`.
   2. **Buat Aplikasi Custom** → `/custom`.

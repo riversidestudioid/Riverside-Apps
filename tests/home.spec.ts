@@ -9,7 +9,7 @@ for (const width of [375, 768, 1024, 1440]) {
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: "Solusi Aplikasi & Web App untuk Kebutuhanmu.",
+        name: "Aplikasi Sederhana, Manfaat Nyata.",
       }),
     ).toBeVisible();
     // Exactly two primary services, each with one action.
