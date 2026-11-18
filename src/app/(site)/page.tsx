@@ -47,12 +47,12 @@ export default async function Home() {
       <section className="hero">
         <div className="container hero-inner">
           <h1>
-            Solusi Aplikasi &amp; Web App
-            <span>untuk Kebutuhanmu.</span>
+            Aplikasi Sederhana, <span>Manfaat Nyata.</span>
           </h1>
           <p className="hero-lead">
-            Pilih aplikasi siap pakai atau pesan aplikasi custom untuk gereja,
-            sekolah, bisnis, dan organisasi.
+            Temukan berbagai aplikasi dan web app yang dirancang untuk
+            mempermudah aktivitas, membantu menyelesaikan masalah, dan
+            memberikan solusi bagi kebutuhan sehari-hari.
           </p>
         </div>
       </section>
